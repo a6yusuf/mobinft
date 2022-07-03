@@ -13,8 +13,11 @@ const Navbar = () => {
   const router = useRouter()
   const state = useSelector(state => state.auth)
   let name = state?.user?.name
+  let role = state?.user?.role
+  // let packages = state?.user?.packages
 
-  // console.log("User: ", name)
+
+  // console.log("User: ", packages)
 
   const dispatch = useDispatch()
 
@@ -73,6 +76,16 @@ const Navbar = () => {
                   Settings
                 </NavLink>
               </li>
+              {role === 'admin' && <li className="nav-item nav-toplink">
+                <NavLink className="nav-link" to="/users">
+                  Users
+                </NavLink>
+              </li>}
+              {(role === 'agency' || role === 'admin') && <li className="nav-item nav-toplink">
+                <NavLink className="nav-link" to="/agency">
+                  Users
+                </NavLink>
+              </li>}
               <li className="nav-item nav-toplink">
                 <NavLink className="nav-link" to="/training">
                   Training

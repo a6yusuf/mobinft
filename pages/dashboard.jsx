@@ -10,6 +10,7 @@ import Axios from './../helpers/axios';
 import cookie from 'js-cookie';
 import { useSelector } from 'react-redux';
 import { useState } from 'react';
+import Spinner from './../components/Spinner';
 
 
 
@@ -31,7 +32,7 @@ export default function Dashboard() {
             headers: headers,
         })
         .then(res => {
-            console.log("data: ", res.data)
+            // console.log("data: ", res.data)
             let arr = []
             let coll = res.data.filter(item => item.collection === 'yes')
             let totalNFT = res.data.map(item => arr.push(item.total_nft))
@@ -51,7 +52,8 @@ export default function Dashboard() {
                     <div className="card-body">
                         <h4 className="font-weight-normal mb-3">Total Collections 
                         </h4>
-                        <h2 className="mb-5">{project.collection ? project.collection : 0}</h2>
+                        {!project.loading && <h2 className="mb-5">{project.collection ? project.collection : 0}</h2>}
+                        {project.loading && <Spinner />}
                     </div>
                     </div>
                 </div>
@@ -60,7 +62,8 @@ export default function Dashboard() {
                     <div className="card-body">
                         <h4 className="font-weight-normal mb-3">Total NFTs 
                         </h4>
-                        <h2 className="mb-5">{project.totalNFT ? project.totalNFT : 0}</h2>
+                        {!project.loading && <h2 className="mb-5">{project.totalNFT ? project.totalNFT : 0}</h2>}
+                        {project.loading && <Spinner />}
                     </div>
                     </div>
                 </div>
