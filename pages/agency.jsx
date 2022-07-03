@@ -129,6 +129,18 @@ export default function Agency() {
         }
     }
 
+   const handleExport = () => {
+        // console.log(this.state.tableData)
+        let csvContent = "data:text/csv;charset=utf-8," + data?.map(e => Object.values(e).join(",")).join("\n");
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "users.csv");
+        document.body.appendChild(link); // Required for FF
+
+        link.click();
+    }
+
   return (
     <Page title="My Users">
         <div className="settings-panel">
@@ -175,7 +187,7 @@ export default function Agency() {
                     <AiOutlineLoading size={70} className="icon" />
                     </div>
                 </div>}
-                {!loading && data !== undefined && <UserTable data={data} handleDelete={handleDelete} handlePackage={handlePackage} packages={packages} handleData={handleData} submit={submit}/>}
+                {!loading && data !== undefined && <UserTable data={data} handleDelete={handleDelete} handlePackage={handlePackage} handleExport={handleExport} packages={packages} handleData={handleData} submit={submit}/>}
             </div>
             </div>
         </div>

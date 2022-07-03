@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { validateEmail } from './../helpers/validateEmail';
 import { useSelector } from 'react-redux';
 
-export default function UserTable({data, handleDelete, packages, handleData, handlePackage, submit}) {
+export default function UserTable({data, handleDelete, packages, handleData, handlePackage, submit, handleExport}) {
 
     const [query, setQuery] = useState('')
     const [found, setFound] = useState(undefined)
@@ -57,8 +57,11 @@ export default function UserTable({data, handleDelete, packages, handleData, han
         </div>}
         {!found && <div className="input-group mb-3">
             <button className='btn btn-primary' style={{marginRight: 10}} onClick={search}>Search</button>
-            <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" className="btn btn-primary" data-bs-toggle="modal" style={{marginRight: 10}}data-bs-target="#exampleModal">
             Add User
+            </button>
+            <button type="button" className="btn btn-primary" onClick={handleExport}>
+            Export Users
             </button>
         </div>}
         </div>
