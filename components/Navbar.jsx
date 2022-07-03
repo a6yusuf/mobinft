@@ -14,7 +14,7 @@ const Navbar = () => {
   const state = useSelector(state => state.auth)
   let name = state?.user?.name
   let role = state?.user?.role
-  // let packages = state?.user?.packages
+  let profile_picture = state?.user?.profile_picture
 
 
   // console.log("User: ", packages)
@@ -103,7 +103,11 @@ const Navbar = () => {
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="#">
-                  <Avartar user={name}/>
+                  {!profile_picture && <Avartar user={name}/>}
+                  {profile_picture && <div className='profile-wrapper'>
+                      <p className='user-name' >{name}</p>
+                      <img src={profile_picture} alt="profile pics" style={{width:35, borderRadius: '100%'}} />
+                  </div>}
                 </a>
               </li>
             </ul>
