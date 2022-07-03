@@ -16,7 +16,7 @@ function LayersPanel() {
 
   const [value, setValue] = useState("");
 
-  const addLayer = (value: string) => {
+  const addLayer = (value) => {
     setLayers([
       ...layers,
       {
@@ -32,17 +32,17 @@ function LayersPanel() {
     ]);
   };
 
-  const removeLayer = (e: any, id: string) => {
+  const removeLayer = (e, id) => {
     e.stopPropagation();
     setActiveLayerId(null);
     setLayers(layers.filter((layer) => layer.id !== id));
   };
 
-  const selectLayer = (id: string) => {
+  const selectLayer = (id) => {
     setActiveLayerId(id);
   };
 
-  const SortableItem = SortableElement(({ name, id }: any) => (
+  const SortableItem = SortableElement(({ name, id }) => (
     <Layer
       id={id}
       name={name}
@@ -52,21 +52,21 @@ function LayersPanel() {
     />
   ));
 
-  const SortableList = SortableContainer(({ items }: any) => {
+  const SortableList = SortableContainer(({ items }) => {
     return (
       <ul className="list-unstyled">
-        {items.map(({ id, name }: LayerI, index: any) => (
+        {items.map(({ id, name }, index) => (
           <SortableItem key={`item-${id}`} index={index} name={name} id={id} />
         ))}
       </ul>
     );
   });
 
-  const onSortEnd = ({ oldIndex, newIndex }: any) => {
+  const onSortEnd = ({ oldIndex, newIndex }) => {
     setLayers(arrayMove(layers, oldIndex, newIndex));
   };
 
-  const onSubmit = (e: any) => {
+  const onSubmit = (e) => {
     e.preventDefault();
     addLayer(value);
     setValue("");

@@ -22,7 +22,7 @@ export default function Table({data, loading}) {
       {data !== undefined && data?.length === 0 && <div style={{height: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         <div className="card">
           <div className="card-body">
-            <p style={{margin: 10, fontWeight: 700}}>You've not made any project</p>
+            <p style={{margin: 10, fontWeight: 700}}>You have not made any project</p>
             <button className='btn btn-primary' style={{width: '100%'}} onClick={() => router.push('new-project')}>Create Project</button>
           </div>
         </div>
