@@ -11,13 +11,13 @@ export default function AuthReducer(state=initialState, {type, payload}) {
     switch (type) {
         case types.SET_LOGIN:
             return {
-                ...state,
+                // ...state,
                 loggedIn: true,
                 user: payload
             };
         case types.SET_LOGOUT:
             return {
-                ...state,
+                // ...state,
                 loggedIn: false,
                 user: {}
             }

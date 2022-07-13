@@ -1,6 +1,6 @@
 import Moralis from 'moralis'
 import Web3 from 'web3';
-// import { contractABI, contractAddress } from './contract';
+import { contractABI, contractAddress } from './contract';
 import Axios from 'axios'
 
 const contractUrl = process.env.NEXT_PUBLIC_CONTRACT_URL
@@ -8,7 +8,7 @@ const apiKey = process.env.NEXT_PUBLIC_API_KEY
 
 const capitalizeFirstLetter = string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+}
 
  const capitalizeEachWord = arg => {
      if(!arg.split(' ')){
@@ -22,6 +22,9 @@ const capitalizeFirstLetter = string => {
 
 export const singleRarible = async  (name, desc, img, user) => {
     
+    // const web3 = new Web3(Web3.givenProvider)
+    //     const metamaskProvider = window.ethereum.providers.find((provider) => provider.isMetaMask);
+        // web3.setProvider(metamaskProvider);
     const web3 = await Moralis.enableWeb3();
     const imageFile = new Moralis.File(img.name, img)
     await imageFile.saveIPFS();
@@ -41,7 +44,7 @@ export const singleRarible = async  (name, desc, img, user) => {
     let metadataHash = jsonFile.hash();
     console.log(jsonFile.ipfs())
     let res = await Moralis.Plugins.rarible.lazyMint({
-        chain: 'rinkeby',
+        chain: 'eth',
         userAddress: user.get('ethAddress'),
         tokenType: 'ERC721',
         tokenUri: 'ipfs://' + metadataHash,
@@ -113,7 +116,7 @@ export const bulkRarible = async  (name, desc, user, collection) => {
             let hashh = resp.data[0].path.split('/')[4]
             //lazy mint
             Moralis.Plugins.rarible.lazyMint({
-                chain: 'rinkeby',
+                chain: 'eth',
                 userAddress: user.get('ethAddress'),
                 tokenType: 'ERC1155',
                 tokenUri: `/ipfs/${hashh}`,
@@ -136,59 +139,84 @@ export const bulkRarible = async  (name, desc, user, collection) => {
 
 }
 
-// export const openSea = async  (name, desc, img, user, collectionSize) => {
+export const openSea = async  (name, desc, img, user) => {
 
-//     try {
-//         const web3 = new Web3(Web3.givenProvider)
-//         const metamaskProvider = window.ethereum.providers.find((provider) => provider.isMetaMask);
-//         web3.setProvider(metamaskProvider);
+    const web3 = new Web3(Web3.givenProvider)
+    let txHash
+    // let contractAddress
+    let imageFileUrl, metadataUrl
+
+    try {
+        // const metamaskProvider = window.ethereum.providers.find((provider) => provider.isMetaMask);
+        // web3.setProvider(metamaskProvider);
         
-//         const web = await Moralis.enableWeb3();
-//         const imageFile = new Moralis.File(img.name, img)
-//         await imageFile.saveIPFS();
-//         let imageHash = imageFile.hash();
+        const web = await Moralis.enableWeb3();
+        const imageFile = new Moralis.File(img.name, img)
+        await imageFile.saveIPFS();
+        let imageHash = imageFile.hash();
 
-//         let imageFileUrl = imageFile.ipfs()
+        imageFileUrl = imageFile.ipfs()
     
-//         let metadata = {
-//             name: name,
-//             description: desc,
-//             image: imageFileUrl
-//         }
-//         console.log(metadata);
-//         const jsonFile = new Moralis.File(`${name}metadata.json`, {base64 : Buffer.from(JSON.stringify(metadata)).toString("base64")});
-//         await jsonFile.saveIPFS();
+        let metadata = {
+            name: name,
+            description: desc,
+            image: imageFileUrl
+        }
+        console.log(metadata);
+        const jsonFile = new Moralis.File(`${name}metadata.json`, {base64 : Buffer.from(JSON.stringify(metadata)).toString("base64")});
+        await jsonFile.saveIPFS();
     
-//         let metadataHash = jsonFile.hash();
-//         console.log(jsonFile.ipfs())
-//         let metadataUrl = jsonFile.ipfs()
+        let metadataHash = jsonFile.hash();
+        console.log(jsonFile.ipfs())
+        metadataUrl = jsonFile.ipfs()
   
-//         let cont = buildContract(name, false)
-//         // console.log("contract: ", cont)
-//         Axios.post(contractUrl, {contract: cont})
-//         .then(res => {
-//             console.log(res.data)
-//             let bi = res.data.abi
-//             let bytecod = res.data.bytecode
-//             let contract = new web3.eth.Contract(bi)
-//             contract.deploy({data: bytecod}).send({from: user.get("ethAddress")})
-//         })
-//         .then(contract.methods.mint(metadataUrl).send({from: user.get("ethAddress")}))
-//         .then(console.log)
-//         .catch(error => console.error(error))
-//         // let response = webDeploy(abi, bytecode)
-//         // let contract = new web3.eth.Contract(contractABI, contractAddress)
-//         // let response = await contract.methods.mint(metadataUrl).send({from: user.get("ethAddress")})
-//         // let tokenId = response.events.Transfer.returnValues.tokenId
-//         // return {contractAddress, tokenId, imageFileUrl, metadataUrl}
-//         // console.log(response)
+        // let cont = buildContract(name, false)
+        // // console.log("contract: ", cont)
+        // Axios.post(contractUrl, {contract: cont})
+        // .then(res => {
+        //     console.log(res.data)
+        //     let bi = res.data.abi
+        //     let bytecod = res.data.bytecode
+        //     let contract = new web3.eth.Contract(bi)
+        //     contract.deploy({data: bytecod}).send({from: user.get("ethAddress")})
+        // })
+        // .then(contract.methods.mint(metadataUrl).send({from: user.get("ethAddress")}))
+        // .then(console.log)
+        // .catch(error => console.error(error))
+        // let response = webDeploy(abi, bytecode)
+        let contract = new web3.eth.Contract(contractABI, contractAddress)
+        let response = await contract.methods.mint(metadataUrl).send({from: user.get("ethAddress")})
+        .on('transactionHash', hash => txHash = hash)
+                .on('receipt', receipt => {
+                // receipt example
+                console.log("trans: ", receipt)
+                // return receipt.contractAddress
+                let tokenId = receipt.events.Transfer.returnValues.tokenId
+                return {contractAddress, tokenId, imageFileUrl, metadataUrl}
+            })
+        // let tokenId = response.events.Transfer.returnValues.tokenId
+        // return {contractAddress, tokenId, imageFileUrl, metadataUrl}
+        // console.log(response)
       
     
-//     } catch (error) {
-//         console.error(error)
-//     }
+    } catch (error) {
+        console.error(error)
+        if(error.includes('not mined within 50 blocks')) {
+            const handle = setInterval(() => {
+              web3.eth.getTransactionReceipt(txHash).then((resp) => {
+                if(resp != null && resp.blockNumber > 0) {
+                  clearInterval(handle);
+                  console.log("trans: ", resp)
+                  let tokenId = resp.events.Transfer.returnValues.tokenId
+                  return {contractAddress, tokenId, imageFileUrl, metadataUrl}
+                //   return resp.contractAddress
+                }
+              })
+            })
+        }
+    }
 
-// }
+}
 
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -197,7 +225,7 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onerror = error => reject(error);
 });
 
-export const mintCollection1 = async (file, name, desc, user, collectionName) => {
+export const mintCollection1 = async (file, name, desc, user, collectionName, cb) => {
     
     
     let ipfsArray = [];
@@ -212,23 +240,24 @@ export const mintCollection1 = async (file, name, desc, user, collectionName) =>
         content: img
     })
 
-        Axios.post("https://deep-index.moralis.io/api/v2/ipfs/uploadFolder", 
-            ipfsArray,
-            {
-                headers: {
-                    "X-API-KEY": apiKey,
-                    "Content-Type": "application/json",
-                    "accept": "application/json"
-                }
+    Axios.post("https://deep-index.moralis.io/api/v2/ipfs/uploadFolder", 
+        ipfsArray,
+        {
+            headers: {
+                "X-API-KEY": apiKey,
+                "Content-Type": "application/json",
+                "accept": "application/json"
             }
-        ).then( (res) => {
-            // console.log(res.data);
-            hash = res.data[0].path.split('/')[4]
-            uploadJSON(hash, apiKey, res.data[0].path)
-        })
-        .catch ( (error) => {
-            console.log(error)
-        })
+        }
+    ).then( (res) => {
+        console.log("first upload: ", res.data);
+        hash = res.data[0].path.split('/')[4]
+        //upload images
+        uploadJSON(hash, apiKey, res.data[0].path)
+    })
+    .catch ( (error) => {
+        console.log(error)
+    })
 
     const uploadJSON = async (hsh, key, img) => {
         let paddedHex = ("00000000000000000000000000000000000000000000000000000000000000001".toString(16)).substr("-64");
@@ -253,11 +282,13 @@ export const mintCollection1 = async (file, name, desc, user, collectionName) =>
         ).then( (res) => {
             console.log("uploaded json: ", res.data);
             let hashh = res.data[0].path.split('/')[4]
+            let mUrl = res.data[0].path
             //compile contract
             let contract = buildContract(name, hashh, collectionName, 1)
-            compile(contract, contractUrl, user).then(res => {
+            // console.log("contract: ", contract)
+            compile(contract, contractUrl, user, img, mUrl, cb).then(ress => {
                 // console.log("Res: ", res)
-                return {contactAddress: res, imageFileUrl: img, metadataUrl: res.data[0].path}
+                return {contactAddress: ress, imageFileUrl: img, metadataUrl: mUrl}
             })
         })
         .catch ( (error) => {
@@ -266,13 +297,14 @@ export const mintCollection1 = async (file, name, desc, user, collectionName) =>
     }
 }
 
-export const mintCollection2 = async (name, desc, user, collection, collectionName) => {
+export const mintCollection2 = async (name, desc, user, collection, collectionName, cb) => {
     
     
     let ipfsArray = [];
     let ipfsArray2 = [];
     let promises = [];
     let hash = ''
+    // let img = collection[0].image
 
     collection.map((item, index) => {
         let paddedHex = ("0000000000000000000000000000000000000000000000000000000000000000" + (index + 1).toString(16)).substr("-64");
@@ -326,9 +358,10 @@ export const mintCollection2 = async (name, desc, user, collection, collectionNa
         ).then( (res) => {
             console.log("uploaded json: ", res.data);
             let hashh = res.data[0].path.split('/')[4]
+            let mUrl = res.data[0].path
             //compile contract
             let contract = buildContract(name, hashh, collectionName, 1)
-            compile(contract, contractUrl, user).then(res => {
+            compile(contract, contractUrl, user, img, mUrl, cb).then(res => {
                 console.log("Res: ", res)
                 return {contactAddress: res, imageFileUrl: img, metadataUrl: res.data[0].path}
             })
@@ -350,14 +383,14 @@ const buildContract = (name, hash, collectionName, collectionSize) => {
 
     
     
-    contract ${capitalizeEachWord(name)} is ERC1155, Ownable {
+    contract ${capitalizeEachWord(name.toString())} is ERC1155, Ownable {
         string public name;
 
         constructor()
             ERC1155("ipfs://${hash}/metadata/{id}.json" )
         
         {
-            setName('${collectionName}');
+            setName('${collectionName.toString()}');
             for (uint i = 1; i <= ${collectionSize}; i++) {
             _mint(msg.sender, i, 1, "");
             }
@@ -372,10 +405,10 @@ const buildContract = (name, hash, collectionName, collectionSize) => {
 }
 
 //compile and deploy smart contract
-const compile = async (contract, contractUrl, user) => {
+const compile = async (contract, contractUrl, user, imgg, mUrll, cb) => {
     const web3 = new Web3(Web3.givenProvider)
-    const metamaskProvider = window.ethereum.providers.find((provider) => provider.isMetaMask);
-    web3.setProvider(metamaskProvider);
+    // const metamaskProvider = window.ethereum.providers.find((provider) => provider.isMetaMask);
+    // web3.setProvider(metamaskProvider);
     
     const web = await Moralis.enableWeb3();
     let txHash;
@@ -385,11 +418,12 @@ const compile = async (contract, contractUrl, user) => {
             let bi = res.data.abi
             let bytecod = res.data.bytecode
             let contract = new web3.eth.Contract(bi)
-            contract.deploy({data: bytecod}).send({from: user.get("ethAddress")})
+            contract.deploy({data: bytecod}).send({from: user.get("ethAddress"), maxPriorityFeePerGas: null, maxFeePerGas: null})
                 .on('transactionHash', hash => txHash = hash)
                 .on('receipt', receipt => {
                 // receipt example
                 console.log("trans: ", receipt)
+                cb({contractAddress: receipt.contractAddress, imageFileUrl: imgg, metadataUrl: mUrll})
                 return receipt.contractAddress
             })
         })
@@ -400,7 +434,8 @@ const compile = async (contract, contractUrl, user) => {
                   web3.eth.getTransactionReceipt(txHash).then((resp) => {
                     if(resp != null && resp.blockNumber > 0) {
                       clearInterval(handle);
-                      console.log("trans: ", resp)
+                      console.log("trans2: ", resp)
+                      cb({contractAddress: resp.contractAddress, imageFileUrl: imgg, metadataUrl: mUrll})
                       return resp.contractAddress
                     }
                   })

@@ -28,6 +28,8 @@ function MyApp({ Component, pageProps }) {
   const [user, setUser] = useState(null)
   let token = cookie.get('token'); 
   const router = useRouter()
+  // const { token } = router.query
+
 
 
   useEffect(() => {
@@ -54,12 +56,12 @@ function MyApp({ Component, pageProps }) {
         })
         .catch(err => {
           // console.log("errr: ", err)
-          router.push('/login')
+          router.push('/login/app')
         })
         ;
 
     } else {
-        router.push('/login')
+        router.push('/login/app')
     }
 
     // setUser(result)

@@ -31,7 +31,7 @@ const Page = ({ title, children }: PageProps) => {
           />
           <meta
             name="description"
-            content="Create a 10,000 NFT collection with Rarity settings from your assets with SOL and ETH metadata. Ready to mint at blockchain or marketplaces."
+            content="Create a 10,000 NFT collection with Rarity settings from your assets with SOL and ETH metadata. Mint on Polygon and Ethereum blockchain or marketplaces."
           />
           <meta name="robots" content="index, follow" />
           <meta

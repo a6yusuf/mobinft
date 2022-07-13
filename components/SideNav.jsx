@@ -23,7 +23,7 @@ export default function SideNav() {
     // setUser({})
     Cookie.remove('token');
     // logout() 
-    router.push('/login')
+    router.push('/login/app')
   }
   
     const handleSupport = () => {

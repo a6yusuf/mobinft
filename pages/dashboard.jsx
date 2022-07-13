@@ -8,9 +8,11 @@ import { useMoralis } from 'react-moralis';
 import { useEffect } from 'react';
 import Axios from './../helpers/axios';
 import cookie from 'js-cookie';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useState } from 'react';
 import Spinner from './../components/Spinner';
+import { projects } from './../store/actions/ProjectAction';
+
 
 
 
@@ -19,6 +21,8 @@ export default function Dashboard() {
     let token = cookie.get('token'); 
     const {authenticate, isAuthenticated, user} = useMoralis()
     const [project, setProject] = useState({loading: true})    
+
+    const dispatch = useDispatch();
     
     useEffect(() => {
         const headers = {
@@ -37,6 +41,7 @@ export default function Dashboard() {
             let coll = res.data.filter(item => item.collection === 'yes')
             let totalNFT = res.data.map(item => arr.push(item.total_nft))
             setProject({loading: false, collection: coll?.length || 0, totalNFT: arr.reduce((a, b) => parseInt(a) + parseInt(b), 0), data: res.data})
+            dispatch(projects({collection: coll?.length, totalNFT: arr.reduce((a, b) => parseInt(a) + parseInt(b), 0)}))
         })
     }, [])
     

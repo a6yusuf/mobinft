@@ -3,13 +3,24 @@ import React from 'react'
 import img1 from "../assets/home/img1.png";
 import { useRouter } from 'next/router';
 import { AiOutlineLoading } from 'react-icons/ai';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
+import Alert from '../components/Alert';
+
 
 export default function Table({data, loading}) {
 
   const router = useRouter()
+  const [alert, setAlert] = React.useState(false)
+  // console.log("Meta", JSON.parse(data[0].meta))
+
+  const handleAlert = () => {
+    setAlert(true)
+    setTimeout(() => setAlert(false), 3000)
+  }
   
   return (
     <div>
+    {alert && <Alert type="success" msg="Contract address copied to clipboard" />}
       {loading && <div style={{height: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
           <div className="loading">
           <div className="title">Fetching data...</div>
@@ -33,25 +44,21 @@ export default function Table({data, loading}) {
                   <div className="card-body">
                     <h4 className="card-title">Recent Projects</h4>
                     <div className="d-flex">
-                      {/* <div className="d-flex align-items-center me-4 text-muted font-weight-light">
-                        <i className="mdi mdi-account-outline icon-sm me-2"></i>
-                        <span>PandaPunk</span>
-                      </div>
-                      <div className="d-flex align-items-center text-muted font-weight-light">
-                        <i className="mdi mdi-clock icon-sm me-2"></i>
-                        <span>June 3rd, 2022</span>
-                      </div> */}
                     </div>
                     <div className="row mt-3">
                       {data.map((item, index) => {
                         return (
                           <div key={index} className="col-6 col-md-3 pe-1">
                         <div className="card mb-2 mw-100 w-100 rounded" >
-                          <img src={item.nft_url} className="card-img-top" alt="nft" />
+                          <img src={item.nft_url} className="card-img-top" alt="nft" style={{maxHeight: 145}}/>
                           <div className="card-body">
                             <h5 className="card-title">{JSON.parse(item.meta).name}</h5>
                             <p className="card-text">{JSON.parse(item.meta).description}</p>
-                            <a href={JSON.parse(item.meta).platform === 'rarible' ? `https://rinkeby.rarible.com/token/${JSON.parse(item.meta).tokenAddress}:${JSON.parse(item.meta).tokenId}` : `https://testnets.opensea.io/assets/mumbai/${JSON.parse(item.meta).contractAddress}/1`} className="btn btn-primary" target="_blank" rel="noreferrer">View</a>
+                            <a href={JSON.parse(item.meta).platform === 'rarible' ? `https://rarible.com/token/${JSON.parse(item.meta).tokenAddress}:${JSON.parse(item.meta).tokenId}?tab=details` : `https://testnets.opensea.io/assets/mumbai/${JSON.parse(item.meta).contractAddress}/1`} className="btn btn-primary" target="_blank" rel="noreferrer" style={{width: '45%', margin: 5}}>View</a>
+                            <CopyToClipboard text={JSON.parse(item.meta).platform === 'rarible' ? JSON.parse(item.meta).tokenAddress : JSON.parse(item.meta).contractAddress}
+                              onCopy={handleAlert}>
+                            <button className="btn btn-primary"  style={{width: '45%', margin: 5}}>Address</button>
+                            </CopyToClipboard>
                           </div>
                         </div>
                       </div>

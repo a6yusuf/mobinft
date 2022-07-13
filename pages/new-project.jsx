@@ -13,6 +13,7 @@ import Script from 'next/script';
 import Web3 from 'web3';
 import Axios from './../helpers/axios';
 import cookie from 'js-cookie';
+import { useSelector } from 'react-redux';
 
 
 
@@ -27,12 +28,26 @@ export default function NewProject() {
     const [data, setData] = useState({})
     const [nft, setNft] = useState('')
     const [file, setFile] = useState(undefined)
+    const [max, setMax] = useState({collection: 2, nft: 1000})
 
     let token = cookie.get('token'); 
 
+    // const contractAddress = '0xB579F4dE237082780D183Ab2486c70c7A109f339'
 
+    const state = useSelector(state => state)
+    const userDetail = state.auth.user
+    const project = state.project
+
+    // console.log("Project: Date)
 
     const {authenticate, isAuthenticated, user} = useMoralis()
+    
+    useEffect(() => {
+      if(userDetail.packages.includes('pro')){
+          setMax({collection: 25, nft: 10000})
+      }
+
+    }, [])
     
 
     const handleData = e => {
@@ -40,7 +55,6 @@ export default function NewProject() {
             return {...prev, [e.target.name]: e.target.value}
         })
     }
-
     const handleUpload = (e) => {
         setNft(URL.createObjectURL(e.target.files[0]));
         setFile(e.target.files[0]);
@@ -51,46 +65,55 @@ export default function NewProject() {
         if(file && data.name && data.description && isAuthenticated){
             console.log("OpenSeaData: ", data)
             setOpenSeaLoading(true)
-            try {
-                const {contractAddress, imageFileUrl, metadataUrl} = await mintCollection1(file, data.name, data.description, user, data.collection_name)
-                console.log("token: ", contractAddress  )
-                let meta = {
-                    collectionName: data.collection_name,
-                    name: data.name,
-                    description: data.description,
-                    platform: 'opensea',
-                    contractAddress,
-                    tokenId: 1,
-                    imageFileUrl, 
-                    metadataUrl 
+
+            const callback = arg => {
+                console.log("Callback arg: ", arg)
+                try {
+                    // console.log("token: ", dt  )
+                    let meta = {
+                        collectionName: data.collection_name,
+                        name: data.name,
+                        description: data.description,
+                        platform: 'opensea',
+                        contractAddress: arg.contractAddress,
+                        tokenId: 1,
+                        imageFileUrl: arg.imageFileUrl, 
+                        metadataUrl: arg.metadataUrl 
+                    }
+                    const headers = {
+                        "Authorization" : `Bearer ${ token }`
+                    };
+
+                    let projectData = new FormData()
+
+                    projectData.append('collection', 'no')
+                    projectData.append('total_nft', 1)
+                    projectData.append('nft_url', arg.imageFileUrl)
+                    projectData.append('meta', JSON.stringify(meta))
+                    console.log("Sending... ", projectData)
+                    Axios({
+                        method: 'post',
+                        url: 'project',
+                        data: projectData,
+                        headers: headers,
+                    })
+                    .then(res => {
+                        setOpenSeaLoading(false)
+                        setNftAlert(true)
+                        setTimeout(() => setNftAlert(false), 3000)
+                        console.log(res.data)
+                    })
+                } catch (error) {
+                    console.log(error)
                 }
-                const headers = {
-                    "Authorization" : `Bearer ${ token }`
-                };
 
-                let projectData = new FormData()
-
-                projectData.append('collection', 'no')
-                projectData.append('total_nft', 1)
-                projectData.append('nft_url', imageFileUrl)
-                projectData.append('meta', JSON.stringify(meta))
-        
-                Axios({
-                    method: 'post',
-                    url: 'project',
-                    data: projectData,
-                    headers: headers,
-                })
-                .then(res => {
-                    setOpenSeaLoading(false)
-                    setNftAlert(true)
-                    setTimeout(() => setNftAlert(false), 3000)
-                    console.log(res.data)
-                })
-                
+            }
+            try {
+                // const {imageFileUrl, metadataUrl, tokenId} = await openSea(data.name, data.description, file, user)
+                await mintCollection1(file, data.name, data.description, user, data.collection_name, callback)
             } catch (error) {
                 console.error(error)
-                alert("Something went wrong")
+                // alert("Something went wrong")
             }
         }else{
             setImgError(true)
@@ -153,18 +176,18 @@ export default function NewProject() {
                         <button type="button" className="btn btn-primary mint-btn" onClick={authenticate}>Connect Wallet</button>
                         </div>}
                     {isAuthenticated && <div className='np-wrapper'>
-                        <div className="card nft-card" onClick={()=> setUpload(true)}>
+                        {project.totalNFT <= max.nft && <div className="card nft-card" onClick={()=> setUpload(true)}>
                             <FaUpload className="card-img-top nft-icon" />
                             <div className="card-body">
                                 <p className="card-text">Upload NFT</p>
                             </div>
-                        </div>
-                        <div className="card nft-card" onClick={() => router.push('/app')}>
+                        </div>}
+                        {project.collection <= max.collection && <div className="card nft-card" onClick={() => router.push('/app')}>
                             <MdOutlineMonochromePhotos className="card-img-top nft-icon"/>
                             <div className="card-body">
                                 <p className="card-text">Generate NFT</p>
                             </div>
-                        </div>
+                        </div>}
                     </div>}
                     {upload && <div className='nft-upload'>
                         <div>

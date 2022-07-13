@@ -54,46 +54,55 @@ const ResultsPanel = ({
     if(isAuthenticated && data?.collections){
         // console.log("OpenSeaData: ", data)
         setOpenseaLoading(true)
-        try {
-            const res: any = await mintCollection2(collectionName, collectionDesc, user, data?.collections, collectionName)
-            console.log("token: ", res  )
-            let meta = {
-                collectionName: collectionName,
-                name: data.name,
-                description: collectionDesc,
-                platform: 'opensea',
-                contractAddress: res.contractAddress,
-                tokenId: 1,
-                imageFileUrl: res.imageFileUrl, 
-                metadataUrl: res.metadataUrl 
+        //calback
+        const callback = arg => {
+                console.log("Callback arg: ", arg)
+                try {
+                    // console.log("token: ", dt  )
+                    let meta = {
+                        collectionName: data.collection_name,
+                        name: data.name,
+                        description: data.description,
+                        platform: 'opensea',
+                        contractAddress: arg.contractAddress,
+                        tokenId: 1,
+                        imageFileUrl: arg.imageFileUrl, 
+                        metadataUrl: arg.metadataUrl 
+                    }
+                    const headers = {
+                        "Authorization" : `Bearer ${ token }`
+                    };
+
+                    let projectData = new FormData()
+
+                    projectData.append('collection', 'yes')
+                    projectData.append('total_nft', 1)
+                    projectData.append('nft_url', arg.imageFileUrl)
+                    projectData.append('meta', JSON.stringify(meta))
+                    console.log("Sending... ", projectData)
+                    Axios({
+                        method: 'post',
+                        url: 'project',
+                        data: projectData,
+                        headers: headers,
+                    })
+                    .then(res => {
+                        setOpenSeaLoading(false)
+                        setNftAlert(true)
+                        setTimeout(() => setNftAlert(false), 3000)
+                        console.log(res.data)
+                    })
+                } catch (error) {
+                    console.log(error)
+                }
+
             }
-            const headers = {
-                "Authorization" : `Bearer ${ token }`
-            };
-
-            let projectData = new FormData()
-
-            projectData.append('collection', 'yes')
-            projectData.append('total_nft', collectionSize.toString())
-            projectData.append('nft_url', res.imageFileUrl)
-            projectData.append('meta', JSON.stringify(meta))
-    
-            axios({
-                method: 'post',
-                url: 'project',
-                data: projectData,
-                headers: headers,
-            })
-            .then(res => {
-                setOpenseaLoading(false)
-                setNftAlert(true)
-                setTimeout(() => setNftAlert(false), 3000)
-                console.log(res.data)
-            })
             
+        try {
+            const res: any = await mintCollection2(collectionName, collectionDesc, user, data?.collections, collectionName, calback)
         } catch (error) {
             console.error(error)
-            alert("Something went wrong")
+            // alert("Something went wrong")
         }
     }
 } 

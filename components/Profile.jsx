@@ -39,7 +39,7 @@ export default function Profile() {
         .then(res => {
             setProfile(res.data)
             dispatch(login(res.data))
-            console.log("Res: ", res.data)
+            // console.log("Res: ", res.data)
         })
     }, [updated])
     
@@ -85,7 +85,7 @@ export default function Profile() {
                 setUpdated(true)
                 setProfileAlert(true)
                 setTimeout(() => setProfileAlert(false), 3000)
-                console.log(res.data)
+                // console.log(res.data)
             })
         }else{
             alert("Required field missing!")
@@ -98,9 +98,9 @@ export default function Profile() {
         <h5 className="card-title">Edit Profile</h5>
         <div className="col-12 col-md-5 pe-1">
             <div className="card mb-2 mw-100 w-100 rounded" >
-                {profile?.profile_picture && !file && <img src={profile?.profile_picture} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 350}} />}
+                {profile?.profile_picture !== 'NA' && !file && <img src={profile?.profile_picture} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 350}} />}
                 {file && <img src={URL.createObjectURL(file)} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 350}} />}
-                {!profile?.profile_picture && !file && <Image src={superuser} alt="profile-img" style={{borderRadius: '100%', padding: 10, height: 350, background: 'steelblue'}}/>}
+                {profile?.profile_picture === 'NA' && !file && <Image src={superuser} alt="profile-img" style={{borderRadius: '100%', padding: 10, height: 350, background: 'steelblue'}}/>}
                 <div className="card-body" style={{textAlign: 'center'}}>
                 <h5 className="card-title">{profile?.name}</h5>
                 <p className="card-text" style={{marginBottom: 10, fontWeight: 500}}>{profile?.email}</p>
@@ -121,7 +121,7 @@ export default function Profile() {
         <div className="col-12 col-md-7 pe-1">
             <div className="input-group mb-3">
                 <span className="input-group-text" id="inputGroup-sizing-default">New Name</span>
-                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="name" />
+                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="name" onClick={(e) => setName(e.target.value)}/>
             </div>
         </div>
         <div className="input-group mb-3">
