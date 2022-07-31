@@ -46,7 +46,8 @@ const SettingsPanel = ({ startGenerating, freePlan }: SettingsPanelProps) => {
                         className="mt-3"
                       >
                         <BsFillCheckCircleFill size={18} />
-                        {collectionSize > freePlanSize && " Pay &"} Generate
+                        {/* {collectionSize > freePlanSize && " Pay &"} Generate */}
+                        Generate
                         Collection
                       </Button>
                     </div>

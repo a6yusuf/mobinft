@@ -121,7 +121,7 @@ export default function Profile() {
         <div className="col-12 col-md-7 pe-1">
             <div className="input-group mb-3">
                 <span className="input-group-text" id="inputGroup-sizing-default">New Name</span>
-                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="name" onClick={(e) => setName(e.target.value)}/>
+                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" name="name" onChange={(e) => setName(e.target.value)}/>
             </div>
         </div>
         <div className="input-group mb-3">

@@ -369,6 +369,7 @@ const startCreating = async (
 
           data.collections.push({
             image: canvas.toDataURL("image/png"),
+            imageBlob: dataURItoBlob(canvas.toDataURL("image/png")),
             meta: metadataList.find(
               (meta: any) => meta.edition == abstractedIndexes[0]
             ),

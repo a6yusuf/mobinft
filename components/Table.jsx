@@ -17,6 +17,8 @@ export default function Table({data, loading}) {
     setAlert(true)
     setTimeout(() => setAlert(false), 3000)
   }
+
+  // console.log(JSON.parse(data[0].meta))
   
   return (
     <div>
@@ -54,7 +56,7 @@ export default function Table({data, loading}) {
                           <div className="card-body">
                             <h5 className="card-title">{JSON.parse(item.meta).name}</h5>
                             <p className="card-text">{JSON.parse(item.meta).description}</p>
-                            <a href={JSON.parse(item.meta).platform === 'rarible' ? `https://rarible.com/token/${JSON.parse(item.meta).tokenAddress}:${JSON.parse(item.meta).tokenId}?tab=details` : `https://testnets.opensea.io/assets/mumbai/${JSON.parse(item.meta).contractAddress}/1`} className="btn btn-primary" target="_blank" rel="noreferrer" style={{width: '45%', margin: 5}}>View</a>
+                            {JSON.parse(item.meta).platform === 'rarible' && <a href={JSON.parse(item.meta).platform === 'rarible' ? `https://rarible.com/token/${JSON.parse(item.meta).tokenAddress}:${JSON.parse(item.meta).tokenId}?tab=details` : `https://testnets.opensea.io/assets/mumbai/${JSON.parse(item.meta).contractAddress}/1`} className="btn btn-primary" target="_blank" rel="noreferrer" style={{width: '45%', margin: 5}}>View</a>}
                             <CopyToClipboard text={JSON.parse(item.meta).platform === 'rarible' ? JSON.parse(item.meta).tokenAddress : JSON.parse(item.meta).contractAddress}
                               onCopy={handleAlert}>
                             <button className="btn btn-primary"  style={{width: '45%', margin: 5}}>Address</button>

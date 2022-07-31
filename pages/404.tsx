@@ -15,7 +15,7 @@ const Page404 = (props: Page404Props) => {
           subTitle="404"
           paragraph="There’s nothing here, but if you feel this is an error please let us know."
         />
-        <Button theme="white" to="/">Go Back To Home Page</Button>
+        <Button theme="white" to="/dashboard">Go Back To Home Page</Button>
       </Section>
     </Page>
   );

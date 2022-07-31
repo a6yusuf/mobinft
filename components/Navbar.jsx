@@ -104,7 +104,7 @@ const Navbar = () => {
               <li className="nav-item">
                 <a className="nav-link" href="#">
                   {profile_picture === 'NA' && <Avartar user={name}/>}
-                  {profile_picture !== 'NA' && <div className='profile-wrapper'>
+                  {profile_picture !== 'NA' && <div className='profile-wrapper' onClick={() => router.push('/settings')}>
                       <p className='user-name' >{name}</p>
                       <img src={profile_picture} alt="profile pics" style={{width:35, borderRadius: '100%'}} />
                   </div>}

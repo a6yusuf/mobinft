@@ -2,6 +2,7 @@ import Moralis from 'moralis'
 import Web3 from 'web3';
 import { contractABI, contractAddress } from './contract';
 import Axios from 'axios'
+import { dataURLtoFile } from '../services/generate';
 
 const contractUrl = process.env.NEXT_PUBLIC_CONTRACT_URL
 const apiKey = process.env.NEXT_PUBLIC_API_KEY
@@ -37,106 +38,75 @@ export const singleRarible = async  (name, desc, img, user) => {
         description: desc,
         image: "/ipfs/" + imageHash
     }
-    console.log(metadata);
+    // console.log(metadata);
     const jsonFile = new Moralis.File(`${name}metadata.json`, {base64 : Buffer.from(JSON.stringify(metadata)).toString("base64")});
     await jsonFile.saveIPFS();
 
     let metadataHash = jsonFile.hash();
-    console.log(jsonFile.ipfs())
+    // console.log("hash: ", metadataHash)
     let res = await Moralis.Plugins.rarible.lazyMint({
         chain: 'eth',
         userAddress: user.get('ethAddress'),
-        tokenType: 'ERC721',
+        tokenType: 'ERC1155',
         tokenUri: 'ipfs://' + metadataHash,
         royaltiesAmount: 5, // 0.05% royalty. Optional
     })
     let nftData = {tokenAddress: res.data.result.tokenAddress, tokenId: res.data.result.tokenId, url: `https://rinkeby.rarible.com/token/${res.data.result.tokenAddress}:${res.data.result.tokenId}`, metadataHash, imageFileUrl}
     return nftData;
 }
-export const bulkRarible = async  (name, desc, user, collection) => {
+
+export const bulkRarible = async  (name, desc, user, collection, cb) => {
     
     const web3 = await Moralis.enableWeb3();
+    let nftArr = []
 
-    let ipfsArray = [];
-    let ipfsArray2 = [];
-    let promises = [];
-    let hash = ''
+    for (let i = 0; i < collection.length; i++) {
+        
+        let imgg = collection[i].image
+        //get extension
+        const extension = imgg.substring(
+            "data:image/".length,
+            imgg.indexOf(";base64")
+        );
+        // change image name
+        const file = dataURLtoFile(
+        imgg,
+        `${Math.random().toString(16).slice(2)}.${extension}`
+        );
 
-    collection.map((item, index) => {
-        let paddedHex = ("0000000000000000000000000000000000000000000000000000000000000000" + (index + 1).toString(16)).substr("-64");
-        ipfsArray.push({
-                        path: `images/${paddedHex}.png`,
-                        content: item.image
-                    })
-    })
-    Axios.post("https://deep-index.moralis.io/api/v2/ipfs/uploadFolder", 
-        ipfsArray,
-        {
-            headers: {
-                "X-API-KEY": apiKey,
-                "Content-Type": "application/json",
-                "accept": "application/json"
-            }
+        const imageFile = new Moralis.File(file.name, file)
+
+        await imageFile.saveIPFS();
+        let imageHash = imageFile.hash();
+
+        let imageFileUrl = imageFile.ipfs()
+        
+        let metadata = {
+            name: `${name} #${i}`,
+            description: desc,
+            image: "/ipfs/" + imageHash
         }
-    ).then( (res) => {
-        console.log(res.data);
-        hash = res.data[0].path.split('/')[4]
-        uploadJSON(hash, apiKey, res.data[0].path)
+        
+        // console.log(metadata);
+        const jsonFile = new Moralis.File(`${name}metadata.json`, {base64 : Buffer.from(JSON.stringify(metadata)).toString("base64")});
+        await jsonFile.saveIPFS();
 
-    })
-    .catch ( (error) => {
-        console.log(error)
-    })
-    
-    //Upload json
-    const uploadJSON = async (hsh, key, img) => {
-        for (let i = 1; i <= collection.length; i++) {
-            let paddedHex = ("0000000000000000000000000000000000000000000000000000000000000000" + i.toString(16)).substr("-64");
-            ipfsArray2.push({
-                path: `metadata/${paddedHex}.json`,
-                content: {
-                    image: `ipfs://${hsh}/images/${paddedHex}.png`,
-                    name: `${name} #${i}`,
-                    description: desc
-                }
-            })
-        }
-
-        Axios.post("https://deep-index.moralis.io/api/v2/ipfs/uploadFolder", 
-        ipfsArray2,
-        {
-            headers: {
-                "X-API-KEY": key,
-                "Content-Type": "application/json",
-                "accept": "application/json"
-            }
-        }
-        ).then( (resp) => {
-            console.log("uploaded json: ", resp.data);
-            let hashh = resp.data[0].path.split('/')[4]
-            //lazy mint
-            Moralis.Plugins.rarible.lazyMint({
-                chain: 'eth',
-                userAddress: user.get('ethAddress'),
-                tokenType: 'ERC1155',
-                tokenUri: `/ipfs/${hashh}`,
-                royaltiesAmount: 5, // 0.05% royalty. Optional
-                // supply: 100,
-                // list: true, // Only if lazy listing
-                // listTokenAmount: 3, // Only if lazy listing
-                // listTokenValue: 10 ** 18, // Only if lazy listing
-                // listAssetClass: 'ETH', // only if lazy listing  || optional
-              })
-              .then(res => {
-                  let nftData = {tokenAddress: res.data.result.tokenAddress, imageFileUrl: img, metadataUrl: resp.data}
-                  return nftData;
-              })
+        let metadataHash = jsonFile.hash();
+        // console.log("hash: ", metadataHash)
+        let res = await Moralis.Plugins.rarible.lazyMint({
+            chain: 'eth',
+            userAddress: user.get('ethAddress'),
+            tokenType: 'ERC1155',
+            tokenUri: 'ipfs://' + metadataHash,
+            royaltiesAmount: 5, // 0.05% royalty. Optional
         })
-        .catch ( (error) => {
-            console.log(error)
+        .then(res => {
+            let nftData = {tokenAddress: res.data.result.tokenAddress, tokenId: res.data.result.tokenId, url: `https://rinkeby.rarible.com/token/${res.data.result.tokenAddress}:${res.data.result.tokenId}`, metadataHash, imageFileUrl}
+            nftArr.push(nftData);
         })
     }
-
+    cb(nftArr[0])
+    // console.log("Minted: ", nftArr)
 }
 
 export const openSea = async  (name, desc, img, user) => {
@@ -250,7 +220,7 @@ export const mintCollection1 = async (file, name, desc, user, collectionName, cb
             }
         }
     ).then( (res) => {
-        console.log("first upload: ", res.data);
+        // console.log("first upload: ", res.data);
         hash = res.data[0].path.split('/')[4]
         //upload images
         uploadJSON(hash, apiKey, res.data[0].path)
@@ -280,7 +250,7 @@ export const mintCollection1 = async (file, name, desc, user, collectionName, cb
             }
         }
         ).then( (res) => {
-            console.log("uploaded json: ", res.data);
+            // console.log("uploaded json: ", res.data);
             let hashh = res.data[0].path.split('/')[4]
             let mUrl = res.data[0].path
             //compile contract
@@ -299,20 +269,21 @@ export const mintCollection1 = async (file, name, desc, user, collectionName, cb
 
 export const mintCollection2 = async (name, desc, user, collection, collectionName, cb) => {
     
-    
     let ipfsArray = [];
     let ipfsArray2 = [];
     let promises = [];
     let hash = ''
     // let img = collection[0].image
 
-    collection.map((item, index) => {
-        let paddedHex = ("0000000000000000000000000000000000000000000000000000000000000000" + (index + 1).toString(16)).substr("-64");
+    // collection.map((item, index) => {
+    for (let i = 1; i <= collection.length; i++) {
+        let img = await toBase64(collection[i - 1].imageBlob)
+        let paddedHex = ("0000000000000000000000000000000000000000000000000000000000000000" + i.toString(16)).substr("-64");
         ipfsArray.push({
                         path: `images/${paddedHex}.png`,
-                        content: item.image
+                        content: img
                     })
-    })
+    }
     Axios.post("https://deep-index.moralis.io/api/v2/ipfs/uploadFolder", 
         ipfsArray,
         {
@@ -323,7 +294,7 @@ export const mintCollection2 = async (name, desc, user, collection, collectionNa
             }
         }
     ).then( (res) => {
-        console.log(res.data);
+        // console.log(res.data);
         hash = res.data[0].path.split('/')[4]
         uploadJSON(hash, apiKey, res.data[0].path)
 
@@ -356,14 +327,14 @@ export const mintCollection2 = async (name, desc, user, collection, collectionNa
             }
         }
         ).then( (res) => {
-            console.log("uploaded json: ", res.data);
+            // console.log("uploaded json: ", res.data);
             let hashh = res.data[0].path.split('/')[4]
             let mUrl = res.data[0].path
             //compile contract
-            let contract = buildContract(name, hashh, collectionName, 1)
+            let contract = buildContract(name, hashh, collectionName, collection.length)
             compile(contract, contractUrl, user, img, mUrl, cb).then(res => {
-                console.log("Res: ", res)
-                return {contactAddress: res, imageFileUrl: img, metadataUrl: res.data[0].path}
+                // console.log("Res: ", res)
+                return {contactAddress: res, imageFileUrl: img, metadataUrl: mUrl}
             })
         })
         .catch ( (error) => {
@@ -380,17 +351,15 @@ const buildContract = (name, hash, collectionName, collectionSize) => {
     
     import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
     import "@openzeppelin/contracts/access/Ownable.sol";
-
     
-    
-    contract ${capitalizeEachWord(name.toString())} is ERC1155, Ownable {
+    contract ${capitalizeEachWord(name)} is ERC1155, Ownable {
         string public name;
 
         constructor()
             ERC1155("ipfs://${hash}/metadata/{id}.json" )
         
         {
-            setName('${collectionName.toString()}');
+            setName('${collectionName}');
             for (uint i = 1; i <= ${collectionSize}; i++) {
             _mint(msg.sender, i, 1, "");
             }
@@ -414,7 +383,7 @@ const compile = async (contract, contractUrl, user, imgg, mUrll, cb) => {
     let txHash;
     Axios.post(contractUrl, {contract})
         .then(res => {
-            console.log(res.data)
+            // console.log(res.data)
             let bi = res.data.abi
             let bytecod = res.data.bytecode
             let contract = new web3.eth.Contract(bi)
@@ -422,7 +391,7 @@ const compile = async (contract, contractUrl, user, imgg, mUrll, cb) => {
                 .on('transactionHash', hash => txHash = hash)
                 .on('receipt', receipt => {
                 // receipt example
-                console.log("trans: ", receipt)
+                // console.log("trans: ", receipt)
                 cb({contractAddress: receipt.contractAddress, imageFileUrl: imgg, metadataUrl: mUrll})
                 return receipt.contractAddress
             })
@@ -434,7 +403,7 @@ const compile = async (contract, contractUrl, user, imgg, mUrll, cb) => {
                   web3.eth.getTransactionReceipt(txHash).then((resp) => {
                     if(resp != null && resp.blockNumber > 0) {
                       clearInterval(handle);
-                      console.log("trans2: ", resp)
+                    //   console.log("trans2: ", resp)
                       cb({contractAddress: resp.contractAddress, imageFileUrl: imgg, metadataUrl: mUrll})
                       return resp.contractAddress
                     }

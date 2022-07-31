@@ -41,6 +41,7 @@ const ResultsPanel = ({
   const {isAuthenticated, user} = useMoralis()
   let token = cookie.get('token'); 
 
+  // console.log("Coll name: ", collectionName, "Descr: ", collectionDesc)
 
   const showMore = () => {
     setCurrentIndex(currentIndex + LIMIT);
@@ -55,14 +56,14 @@ const ResultsPanel = ({
         // console.log("OpenSeaData: ", data)
         setOpenseaLoading(true)
         //calback
-        const callback = arg => {
-                console.log("Callback arg: ", arg)
+        const callback = (arg :any) => {
+                // console.log("Callback arg: ", arg)
                 try {
                     // console.log("token: ", dt  )
                     let meta = {
-                        collectionName: data.collection_name,
-                        name: data.name,
-                        description: data.description,
+                        collectionName: collectionName,
+                        name: collectionName,
+                        description: collectionDesc,
                         platform: 'opensea',
                         contractAddress: arg.contractAddress,
                         tokenId: 1,
@@ -76,21 +77,21 @@ const ResultsPanel = ({
                     let projectData = new FormData()
 
                     projectData.append('collection', 'yes')
-                    projectData.append('total_nft', 1)
+                    projectData.append('total_nft', collectionSize.toString())
                     projectData.append('nft_url', arg.imageFileUrl)
                     projectData.append('meta', JSON.stringify(meta))
                     console.log("Sending... ", projectData)
-                    Axios({
+                    axios({
                         method: 'post',
                         url: 'project',
                         data: projectData,
                         headers: headers,
                     })
                     .then(res => {
-                        setOpenSeaLoading(false)
+                        setOpenseaLoading(false)
                         setNftAlert(true)
                         setTimeout(() => setNftAlert(false), 3000)
-                        console.log(res.data)
+                        // console.log(res.data)
                     })
                 } catch (error) {
                     console.log(error)
@@ -99,7 +100,7 @@ const ResultsPanel = ({
             }
             
         try {
-            const res: any = await mintCollection2(collectionName, collectionDesc, user, data?.collections, collectionName, calback)
+            const res: any = await mintCollection2(collectionName, collectionDesc, user, data?.collections, collectionName, callback)
         } catch (error) {
             console.error(error)
             // alert("Something went wrong")
@@ -111,17 +112,17 @@ const ResultsPanel = ({
         // console.log("OpenSeaData: ", data)
         setRaribleLoading(true)
         try {
-            const res: any = await bulkRarible(collectionName, collectionDesc, user, data?.collections)
-            console.log("token: ", res  )
+          let callback = (arg: any) => {
+            // console.log("token: ", arg  )
             let meta = {
               collectionName: collectionName,
               name: collectionName,
               description: collectionDesc,
               platform: 'rarible',
-              tokenAddress: res.tokenAddress,
-              tokenId: 1,
-              imageFileUrl: res.imageFileUrl, 
-              metadataUrl: res.metadataUrl 
+              tokenAddress: arg.tokenAddress,
+              tokenId: arg.tokenId,
+              imageFileUrl: arg.imageFileUrl, 
+              metadataUrl: arg.metadataUrl 
             }
             const headers = {
                 "Authorization" : `Bearer ${ token }`
@@ -131,7 +132,7 @@ const ResultsPanel = ({
 
             projectData.append('collection', 'yes')
             projectData.append('total_nft', collectionSize.toString())
-            projectData.append('nft_url', res.imageFileUrl)
+            projectData.append('nft_url', arg.imageFileUrl)
             projectData.append('meta', JSON.stringify(meta))
     
             axios({
@@ -144,9 +145,12 @@ const ResultsPanel = ({
                 setRaribleLoading(false)
                 setNftAlert(true)
                 setTimeout(() => setNftAlert(false), 3000)
-                console.log(res.data)
+                // console.log(res.data)
             })
-            
+
+          }
+            const res: any = await bulkRarible(collectionName, collectionDesc, user, data?.collections, callback)
+                        
         } catch (error) {
             console.error(error)
             alert("Something went wrong")
@@ -258,12 +262,12 @@ const ResultsPanel = ({
               )}{" "}
               Download
             </Button>
-            <Button theme="white" onClick={mintOpenSea} className="btn-sm">
+            <Button theme="white" onClick={mintOpenSea} className="btn-sm" >
               {openseaLoading ? (
                 <AiOutlineLoading className="loading-icon" />
               ) : "Mint OpenSea"}
             </Button>
-            <Button theme="white" onClick={mintRarible} className="btn-sm">
+            <Button theme="white" onClick={mintRarible} className="btn-sm" >
               {raribleLoading ? (
                 <AiOutlineLoading className="loading-icon" />
               ) : "Mint Rarible"}

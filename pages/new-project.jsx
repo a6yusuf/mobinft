@@ -28,7 +28,7 @@ export default function NewProject() {
     const [data, setData] = useState({})
     const [nft, setNft] = useState('')
     const [file, setFile] = useState(undefined)
-    const [max, setMax] = useState({collection: 2, nft: 1000})
+    const [max, setMax] = useState({collection: 20, nft: 1000})
 
     let token = cookie.get('token'); 
 
@@ -43,7 +43,7 @@ export default function NewProject() {
     const {authenticate, isAuthenticated, user} = useMoralis()
     
     useEffect(() => {
-      if(userDetail.packages.includes('pro')){
+      if(userDetail?.packages.includes('pro')){
           setMax({collection: 25, nft: 10000})
       }
 
@@ -63,11 +63,11 @@ export default function NewProject() {
 
     const handleOpenSea = async () => {
         if(file && data.name && data.description && isAuthenticated){
-            console.log("OpenSeaData: ", data)
+            // console.log("OpenSeaData: ", data)
             setOpenSeaLoading(true)
 
             const callback = arg => {
-                console.log("Callback arg: ", arg)
+                // console.log("Callback arg: ", arg)
                 try {
                     // console.log("token: ", dt  )
                     let meta = {
@@ -90,7 +90,7 @@ export default function NewProject() {
                     projectData.append('total_nft', 1)
                     projectData.append('nft_url', arg.imageFileUrl)
                     projectData.append('meta', JSON.stringify(meta))
-                    console.log("Sending... ", projectData)
+                    // console.log("Sending... ", projectData)
                     Axios({
                         method: 'post',
                         url: 'project',
@@ -101,7 +101,7 @@ export default function NewProject() {
                         setOpenSeaLoading(false)
                         setNftAlert(true)
                         setTimeout(() => setNftAlert(false), 3000)
-                        console.log(res.data)
+                        // console.log(res.data)
                     })
                 } catch (error) {
                     console.log(error)
@@ -122,10 +122,10 @@ export default function NewProject() {
     } 
     const handleRarible = async () => {
         if(file && data.name && data.description && isAuthenticated){
-            console.log("RaribleData: ", data)
+            // console.log("RaribleData: ", data)
             setRaribleLoading(true)
             let {tokenAddress, tokenId, url, imageFileUrl, metadataUrl } = await singleRarible(data.name, data.description, file, user)
-            console.log("Rarible Token: ", {tokenAddress, tokenId, url } )
+            // console.log("Rarible Token: ", {tokenAddress, tokenId, url } )
             let meta = {
                 collectionName: data.collection_name,
                 name: data.name,
@@ -157,7 +157,7 @@ export default function NewProject() {
                 setRaribleLoading(false)
                 setNftAlert(true)
                 setTimeout(() => setNftAlert(false), 3000)
-                console.log(res.data)
+                // console.log(res.data)
             })
         }else{
             setImgError(true)

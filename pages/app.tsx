@@ -211,8 +211,8 @@ const Application = () => {
       await validation(layersClone);
 
       // payment
-      const freePlanSize: any = PLANS.find((p) => p.price === 0)?.assetsNumber;
-      if (collectionSize > freePlanSize) return setShowPaypal(true);
+      // const freePlanSize: any = PLANS.find((p) => p.price === 0)?.assetsNumber;
+      // if (collectionSize > freePlanSize) return setShowPaypal(true);
 
       // generating
       await generate();
