@@ -8,9 +8,9 @@ import { useMoralis } from 'react-moralis';
 import {mintCollection1, openSea, singleRarible} from './../helpers/nftFunctions';
 import Alert from '../components/Alert';
 import Spinner from '../components/Spinner';
-import Moralis from 'moralis'
-import Script from 'next/script';
-import Web3 from 'web3';
+// import Moralis from 'moralis'
+// import Script from 'next/script';
+// import Web3 from 'web3';
 import Axios from './../helpers/axios';
 import cookie from 'js-cookie';
 import { useSelector } from 'react-redux';
