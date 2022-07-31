@@ -43,8 +43,6 @@ export default function SideNav() {
         
     return (
                 <aside className="main-nav">
-                    <div >
-                    </div>
                     <nav >
                         <div>
                             <ul className="nav-menu-items">
