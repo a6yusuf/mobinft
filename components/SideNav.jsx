@@ -1,6 +1,6 @@
 import React from 'react'
 import {RiDashboardLine} from 'react-icons/ri';
-import { FaFolder, FaGraduationCap, FaPlus, FaSignOutAlt, FaToolbox, FaUsers } from 'react-icons/fa';
+import { FaImages, FaGraduationCap, FaPlus, FaSignOutAlt, FaToolbox, FaUsers } from 'react-icons/fa';
 import { FaGlobe } from 'react-icons/fa';
 import NavLink from './NavLink';
 import { useRouter } from 'next/router';
@@ -15,7 +15,7 @@ export default function SideNav() {
 
   const state = useSelector(state => state.auth)
   let role = state?.user?.role
-//   let packages = state?.user?.packages
+  let packages = state?.user?.packages
 
 
 
@@ -27,21 +27,23 @@ export default function SideNav() {
   }
   
     const handleSupport = () => {
-    window.location = "mailto:support@goprofunnels.org";
+    window.location = "mailto:support@mobinft.co";
     };
 
     const handleTutorial = () => {
-        const link = "https://getgoprofunnels.com/trainingvideo16673";
+        const link = "https://getmobinft.com/mobinft-training";
+        window.open(link, "_blank");
+    };
+
+    const handleStockPro = () => {
+        const link = "https://stockprohub.com/login/";
         window.open(link, "_blank");
     };
     
         
     return (
-            // <IconContext.Provider value={{className: "nav-icon" }}>
                 <aside className="main-nav">
                     <div >
-                        {/* <img className="w-9 h-9 logo-img" src={Logo} alt="logo" /> */}
-                        {/* <span className="nav-text brandName">MetaCourse</span> */}
                     </div>
                     <nav >
                         <div>
@@ -75,6 +77,12 @@ export default function SideNav() {
                                     <NavLink className="nav-text" to="/agency">
                                         Agency
                                     </NavLink>
+                                </li>}
+                                {(packages.includes('stockpro') || role === 'admin') && <li className="nav-item">
+                                    <FaImages className='nav-icon'/>
+                                    <a className="nav-text" href="#" onClick={handleStockPro}>
+                                        StockPro
+                                    </a>
                                 </li>}
                                 <li className="nav-item">
                                     <FaGraduationCap className='nav-icon'/>

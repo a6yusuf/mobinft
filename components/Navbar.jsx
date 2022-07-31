@@ -14,6 +14,8 @@ const Navbar = () => {
   const state = useSelector(state => state.auth)
   let name = state?.user?.name
   let role = state?.user?.role
+  let packages = state?.user?.packages
+
   let profile_picture = state?.user?.profile_picture
 
 
@@ -26,12 +28,27 @@ const Navbar = () => {
     dispatch(logout())
     router.push('/login/app')
   }
+  
+  const handleSupport = () => {
+    window.location = "mailto:support@mobinft.co";
+    };
+
+  const handleTutorial = () => {
+      const link = "https://getmobinft.com/mobinft-training";
+      window.open(link, "_blank");
+  };
+
+  const handleStockPro = () => {
+      const link = "https://stockprohub.com/login/";
+      window.open(link, "_blank");
+  };
+    
 
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div className="container-fluid">
-          <NavLink className="navbar-brand" to="/app">
+          <NavLink className="navbar-brand" to="/dashboard">
           {/* <Image src="/docs/5.1/assets/brand/bootstrap-logo.svg" alt="" width="30" height="24" className="d-inline-block align-text-top" /> */}
             {businessName}
           </NavLink>
@@ -54,13 +71,6 @@ const Navbar = () => {
             <div className="mr-auto" />
 
             <ul className="navbar-nav my-2 my-lg-0">
-              {/* {pathname !== "/app" && (
-                <li className="nav-item me-2">
-                  <Button className="btn-sm" to="/app">
-                    Generate Collection
-                  </Button>
-                </li>
-              )} */}
               <li className="nav-item nav-toplink">
                 <NavLink className="nav-link" to="/dashboard">
                   Dashboard
@@ -86,15 +96,20 @@ const Navbar = () => {
                   Users
                 </NavLink>
               </li>}
+              {(packages.includes('stockpro') || role === 'admin') && <li className="nav-item nav-toplink">
+                <a className="nav-link" href="#" onClick={handleStockPro}>
+                  StockPro
+                </a>
+              </li>}
               <li className="nav-item nav-toplink">
-                <NavLink className="nav-link" to="/training">
+                <a className="nav-link" href="#" onClick={handleTutorial}>
                   Training
-                </NavLink>
+                </a>
               </li>
               <li className="nav-item nav-toplink">
-                <NavLink className="nav-link" to="/support">
+                <a className="nav-link" href="#" onClick={handleSupport}>
                   Support
-                </NavLink>
+                </a>
               </li>
               <li className="nav-item nav-toplink">
                 <a className="nav-link" href="#" onClick={handleLogout}>
