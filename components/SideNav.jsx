@@ -76,7 +76,7 @@ export default function SideNav() {
                                         Agency
                                     </NavLink>
                                 </li>}
-                                {(packages.includes('stockpro') || role === 'admin') && <li className="nav-item">
+                                {(packages.includes('stock') || role === 'admin') && <li className="nav-item">
                                     <FaImages className='nav-icon'/>
                                     <a className="nav-text" href="#" onClick={handleStockPro}>
                                         StockPro

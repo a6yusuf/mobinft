@@ -96,7 +96,7 @@ const Navbar = () => {
                   Users
                 </NavLink>
               </li>}
-              {(packages.includes('stockpro') || role === 'admin') && <li className="nav-item nav-toplink">
+              {(packages.includes('stock') || role === 'admin') && <li className="nav-item nav-toplink">
                 <a className="nav-link" href="#" onClick={handleStockPro}>
                   StockPro
                 </a>
