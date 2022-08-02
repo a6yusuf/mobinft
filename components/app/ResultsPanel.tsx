@@ -11,6 +11,7 @@ import { bulkRarible, mintCollection2 } from './../../helpers/nftFunctions';
 import cookie from 'js-cookie';
 import axios from "../../helpers/axios";
 import Alert from './../Alert';
+import { useSelector } from 'react-redux';
 
 
 interface ResultsPanelProps {
@@ -40,6 +41,10 @@ const ResultsPanel = ({
 
   const {isAuthenticated, user} = useMoralis()
   let token = cookie.get('token'); 
+
+  const state = useSelector((state: any) => state.auth)
+  let role = state?.user?.role
+  let packages = state?.user?.packages
 
   // console.log("Coll name: ", collectionName, "Descr: ", collectionDesc)
 
@@ -248,13 +253,13 @@ const ResultsPanel = ({
       <div className="collection-images">
         <div className="options-bar text-center mb-3">
           <div className="container">
-            <Button onClick={backToEdit} className="me-3 btn-sm">
+            <Button onClick={backToEdit} className="me-3 btn-sm lil-margin">
               <MdModeEditOutline /> Back To Edit
             </Button>
-            <Button theme="white" onClick={generate} className="me-3 btn-sm">
+            <Button theme="white" onClick={generate} className="me-3 btn-sm lil-margin">
               <AiOutlineReload /> Regenerate
             </Button>
-            <Button theme="white" onClick={downloadZip} className="btn-sm">
+            <Button theme="white" onClick={downloadZip} className="btn-sm lil-margin">
               {downloading ? (
                 <AiOutlineLoading className="loading-icon" />
               ) : (
@@ -262,16 +267,31 @@ const ResultsPanel = ({
               )}{" "}
               Download
             </Button>
-            <Button theme="white" onClick={mintOpenSea} className="btn-sm" >
+            <Button theme="white" onClick={mintOpenSea} className="btn-sm lil-margin" >
               {openseaLoading ? (
                 <AiOutlineLoading className="loading-icon" />
               ) : "Mint OpenSea"}
             </Button>
-            <Button theme="white" onClick={mintRarible} className="btn-sm" >
+            <Button theme="white" onClick={mintRarible} className="btn-sm lil-margin" >
               {raribleLoading ? (
                 <AiOutlineLoading className="loading-icon" />
               ) : "Mint Rarible"}
             </Button>
+            {(packages?.includes('gold') || role === 'admin') && <Button theme="white" onClick={mintOpenSea} className="btn-sm lil-margin" >
+              {openseaLoading ? (
+                <AiOutlineLoading className="loading-icon" />
+              ) : "Mint Binance"}
+            </Button>}
+            {(packages?.includes('gold') || role === 'admin') && <Button theme="white" onClick={mintOpenSea} className="btn-sm lil-margin" >
+              {openseaLoading ? (
+                <AiOutlineLoading className="loading-icon" />
+              ) : "Mint Avalanche"}
+            </Button>}
+            {(packages?.includes('gold') || role === 'admin') && <Button theme="white" onClick={mintOpenSea} className="btn-sm lil-margin" >
+              {openseaLoading ? (
+                <AiOutlineLoading className="loading-icon" />
+              ) : "Mint Fantom"}
+            </Button>}
           </div>
         </div>
 

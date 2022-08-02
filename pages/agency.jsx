@@ -7,6 +7,7 @@ import cookie from 'js-cookie';
 import Spinner from '../components/Spinner';
 import UserTable from '../components/UserTable';
 import { validateEmail } from './../helpers/validateEmail';
+import { useSelector } from 'react-redux';
 
 
 export default function Agency() {
@@ -17,9 +18,19 @@ export default function Agency() {
     const [userData, setUserData] = useState({})
     const [project, setProject] = useState({})
     const [packages, setpackages] = useState(['fe'])
+    const [max, setMax] = useState(100)
+
+    
+    const state = useSelector(state => state)
+    const userDetail = state.auth.user
+
+    let upgrades = userDetail?.packages
 
 
     useEffect(() => {
+        if(upgrades.includes('agency250')){
+            setMax(250)
+        }
         const headers = {
             "Authorization" : `Bearer ${ token }`
         };
@@ -92,7 +103,7 @@ export default function Agency() {
     }
 
     const submit = () => {
-        if(userData.email && userData.name && validateEmail(userData.email) && data.length <= 200){
+        if(userData.email && userData.name && validateEmail(userData.email) && data.length <= max){
             const headers = {
                 "Authorization" : `Bearer ${ token }`
             };

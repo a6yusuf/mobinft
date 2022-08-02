@@ -10,6 +10,7 @@ import Alert from './Alert';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { login } from '../store/actions/AuthAction';
+import dayjs from 'dayjs';
 
 
 export default function Profile() {
@@ -20,6 +21,7 @@ export default function Profile() {
     const [loading, setLoading] = useState(false)
     const [updated, setUpdated] = useState(false)
     const [profileAlert, setProfileAlert] = useState(false)
+    const [usedPeriod, setUsedPeriod] = useState(0)
 
     const dispatch = useDispatch()
 
@@ -39,7 +41,14 @@ export default function Profile() {
         .then(res => {
             setProfile(res.data)
             dispatch(login(res.data))
-            // console.log("Res: ", res.data)
+            //set validity period
+            console.log("Res: ", res.data.created_at)
+            const created = dayjs(res.data.created_at);
+            const now = dayjs();
+    
+            let df1 = now.diff(created, 'month', true);
+            setUsedPeriod(df1)
+            console.log("Used period: ", df1);    
         })
     }, [updated])
     
@@ -98,12 +107,13 @@ export default function Profile() {
         <h5 className="card-title">Edit Profile</h5>
         <div className="col-12 col-md-5 pe-1">
             <div className="card mb-2 mw-100 w-100 rounded" >
-                {profile?.profile_picture !== 'NA' && !file && <img src={profile?.profile_picture} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 350}} />}
-                {file && <img src={URL.createObjectURL(file)} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 350}} />}
-                {profile?.profile_picture === 'NA' && !file && <Image src={superuser} alt="profile-img" style={{borderRadius: '100%', padding: 10, height: 350, background: 'steelblue'}}/>}
+                {profile?.profile_picture !== 'NA' && !file && <img src={profile?.profile_picture} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 300}} />}
+                {file && <img src={URL.createObjectURL(file)} className="card-img-top" alt="nft" style={{borderRadius: '100%', padding: 10, height: 300}} />}
+                {profile?.profile_picture === 'NA' && !file && <Image src={superuser} alt="profile-img" style={{borderRadius: '100%', padding: 10, height: 300, background: 'steelblue'}}/>}
                 <div className="card-body" style={{textAlign: 'center'}}>
                 <h5 className="card-title">{profile?.name}</h5>
                 <p className="card-text" style={{marginBottom: 10, fontWeight: 500}}>{profile?.email}</p>
+                <p className="card-text" style={{marginBottom: 10, fontWeight: 500}}>Access validity: {(14 - usedPeriod).toFixed(2)} month(s)</p>
                 <div>
                     <input type="file" id="vidUpload" accept="image/*" onChange={handleUpload} style={{ display: "none"}}/>
                     <button

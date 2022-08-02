@@ -38,6 +38,9 @@ export default function NewProject() {
     const userDetail = state.auth.user
     const project = state.project
 
+    let role = userDetail?.role
+    let packages = userDetail?.packages
+
     // console.log("Project: Date)
 
     const {authenticate, isAuthenticated, user} = useMoralis()
@@ -209,6 +212,9 @@ export default function NewProject() {
                             <div className="input-group mb-3 mint-btns">
                                 <button type="button" className="btn btn-primary mint-btn" onClick={handleOpenSea}>{openSeaLoading ? <Spinner /> : 'Mint OpenSea' }</button>
                                 <button type="button" className="btn btn-primary mint-btn" onClick={handleRarible}>{raribleLoading ? <Spinner /> : 'Mint Rarible' }</button>
+                                {(packages?.includes('gold') || role === 'admin') && <button type="button" className="btn btn-primary mint-btn" onClick={handleOpenSea}>{openSeaLoading ? <Spinner /> : 'Mint Binance' }</button>}
+                                {(packages?.includes('gold') || role === 'admin') && <button type="button" className="btn btn-primary mint-btn" onClick={handleOpenSea}>{openSeaLoading ? <Spinner /> : 'Mint Avalanche' }</button>}
+                                {(packages?.includes('gold') || role === 'admin') && <button type="button" className="btn btn-primary mint-btn" onClick={handleOpenSea}>{openSeaLoading ? <Spinner /> : 'Mint Fantom' }</button>}
                             </div>
                         </div>
                         <div className='nft-image'>

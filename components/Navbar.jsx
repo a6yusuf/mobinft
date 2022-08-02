@@ -19,7 +19,7 @@ const Navbar = () => {
   let profile_picture = state?.user?.profile_picture
 
 
-  // console.log("User: ", packages)
+  // console.log("User: ", JSON.parse(Array(packages)).includes('pro'))
 
   const dispatch = useDispatch()
 
@@ -93,10 +93,10 @@ const Navbar = () => {
               </li>}
               {(role === 'agency' || role === 'admin') && <li className="nav-item nav-toplink">
                 <NavLink className="nav-link" to="/agency">
-                  Users
+                  Agency
                 </NavLink>
               </li>}
-              {(packages.includes('stock') || role === 'admin') && <li className="nav-item nav-toplink">
+              {(packages?.includes('stock') || role === 'admin') && <li className="nav-item nav-toplink">
                 <a className="nav-link" href="#" onClick={handleStockPro}>
                   StockPro
                 </a>
